@@ -4,7 +4,7 @@ import axios from "axios";
 // import { Message } from "element-ui";
 import Cookies from "js-cookie";
 const api = axios.create({
-  baseURL: 'http://fsapi.shihanbainian.com/1/',
+  baseURL: location.protocol+'//fsapi.shihanbainian.com/1/',
   // baseURL: process.env.API_LOCATION,
   timeout: 10000, // 超时时间
   responseType: "json", // default

@@ -1,7 +1,7 @@
 <template>
   <div class="vote-page">
     <div class="cover" v-show="showBeforeCover">
-      <img src="../assets/img/before.jpg" />
+      <div class="enter" @click="stop">{{content}}</div>
     </div>
     <div class="video-list" v-show="!showBeforeCover">
       <div class="head-logo">
@@ -15,6 +15,7 @@
         :src="item.sh_video_url"
         :likeStatus="item.sh_is_like"
         :likeNum="item.sh_like_num"
+        :poster="item.sh_image"
       />
     </div>
   </div>
@@ -30,27 +31,46 @@ export default {
     return {
       showBeforeCover: true,
       page: 1,
-      page_size: 20,
+      page_size: 50,
       totalPage: null,
       //listArea
       listTextNow: this.listBottomText[0],
-      voteList: []
+      voteList: [],
+      totalTime: 5,
+      content: "",
+      clock: null
     };
   },
   components: {
     VoteItem
   },
   methods: {
+    stop() {
+      window.clearInterval(this.clock);
+      this.showBeforeCover = false;
+    },
+    countDown() {
+      this.content = this.totalTime + "s后进入";
+      this.clock = window.setInterval(() => {
+        this.totalTime--;
+        this.content = this.totalTime + "s后进入";
+        if (this.totalTime <= 0) {
+          window.clearInterval(this.clock);
+          this.showBeforeCover = false;
+        }
+      }, 1000);
+    },
     closeBeforeCover() {
-      setTimeout(() => {
-        this.showBeforeCover = false;
-      }, 3000);
+      // setTimeout(() => {
+      //   this.showBeforeCover = false;
+      // }, 3000);
     },
     getPage() {
       this.listTextNow = this.listBottomText[0];
       this.$fetch("all.getPage", {
         page: this.page,
-        page_size: this.page_size
+        page_size: this.page_size,
+        device: Cookies.get("device")
       }).then(data => {
         this.page++;
         this.totalPage = data.sh_total_rows;
@@ -58,28 +78,32 @@ export default {
         this.listTextNow = this.listBottomText[1];
       });
     },
-    useFingerprint() { 
-      let options = {fonts: {extendedJsFonts: true}, excludes: {userAgent: true}}
+    useFingerprint() {
+       if(Cookies.get("device")){
+        return !1;
+      }
+      let options = {
+        fonts: { extendedJsFonts: true },
+        excludes: { userAgent: true }
+      };
       if (window.requestIdleCallback) {
         requestIdleCallback(function() {
           //必须在v2.0语法提供options参数
           Fingerprint2.getV18(options, function(result, components) {
-            console.log(result); //结果是哈希指纹
-            console.log(components); //组件是{key：'foo'的数组，值：'组件值'}
-              Cookies.set("device", result);
+            // console.log(result); //结果是哈希指纹
+            // console.log(components); //组件是{key：'foo'的数组，值：'组件值'}
+            Cookies.set("device", result);
           });
         });
       } else {
         setTimeout(function() {
           Fingerprint2.getV18(options, function(result, components) {
-            console.log(result); //结果是哈希指纹
-            console.log(components); //组件是{key：'foo'的数组，值：'组件值'}
+            // console.log(result); //结果是哈希指纹
+            // console.log(components); //组件是{key：'foo'的数组，值：'组件值'}
             Cookies.set("device", result);
           });
         }, 500);
       }
-
-      
     },
     loadMore() {
       //可滚动容器的高度
@@ -90,7 +114,8 @@ export default {
         //加载更多操作
         // console.log("loadmore");
         // 判断是否有更多数据
-        if (Math.ceil(this.totalPage / this.page_size) <= this.page) {
+
+        if (this.page <= Math.ceil(this.totalPage / this.page_size)) {
           this.getPage();
         } else {
           this.listTextNow = this.listBottomText[2];
@@ -99,7 +124,7 @@ export default {
     }
   },
   created() {
-    this.closeBeforeCover();
+    this.countDown();
     this.getPage();
     this.useFingerprint();
     window.addEventListener("scroll", this.loadMore);
@@ -110,8 +135,13 @@ export default {
 <style lang="less" scoped>
 .vote-page {
   background-color: black;
+  height: 100%;
+  .video-list {
+    margin-bottom: 50px;
+    width: 100%;
+  }
   .head-logo {
-    width: 750px;
+    width: 100%;
     height: 90px;
     background-color: white;
     .logo {
@@ -122,6 +152,21 @@ export default {
   }
 }
 .cover {
+  position: relative;
+  width: 750px;
+  height: 100%;
+  background: url("../assets/img/before.jpg") repeat top center;
+  background-size: 100% auto;
+  .enter {
+    position: absolute;
+    right: 20px;
+    top: 30px;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 24px;
+    color: #fff;
+    background-color: rgba(116, 113, 113, 0.61);
+  }
   width: 100%;
   img {
     width: 100%;
