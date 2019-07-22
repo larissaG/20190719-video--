@@ -2,9 +2,9 @@
   <div class="video">
     <div class="video-item" :ref="'item'+id">
       <!-- 播放暂停按钮 -->
-      <div class="show-warp" v-show="iconPlayShow">
-        <img class="post-img" @click="playvideo" :src="poster" />
-        <img class="icon_play" @click="playvideo" src="../assets/img/play-icon.png" />
+      <div class="show-warp" v-show="iconPlayShow" @click="clickCover">
+        <img class="post-img" :src="poster" />
+        <img class="icon_play" src="../assets/img/play-icon.png" />
       </div>
       <video
         class="video-content"
@@ -15,11 +15,10 @@
         webkit-playsinline="true"
         x5-video-player-type="h5"
         x-webkit-airplay="true"
-        @click="pauseVideo"
+        @click="clickVideo"
         @ended="onPlayerEnded($event)"
       ></video>
       <!-- :poster="poster" -->
-
       <div class="sub-content">
         <div class="name">{{name}}</div>
         <like-it :id="id" :likeStatus="likeStatus" :likeNum="likeNum" />
@@ -66,30 +65,38 @@ export default {
     likeNum: {
       type: String,
       default: ""
+    },
+    playStatus: {
+      type: Boolean,
+      default: false
+    }
+  },
+  watch: {
+    playStatus: {
+      handler(newStatus, oldStatus) {
+        if (newStatus == true) {
+          this.playvideo(this.$event);
+        } else {
+          this.pauseVideo();
+        }
+      }
     }
   },
   methods: {
-    stopOtherVideo(otherArr) {
-      for (item in otherArr) {
-      }
+    clickVideo(){
+      this.$emit("changeCurrentId",null);
     },
-    stopOne(id) {
-      let video = document.getElementById("video" + id);
-      // let video = this.$ref['video'+id]
-      video.pause();
+    clickCover(){
+       this.$emit("changeCurrentId",this.id);
     },
     playvideo(event) {
       let video = document.getElementById("video" + this.id);
       console.log("playvideo：" + this.id);
-      // this.isVideoShow = false;
+    
       this.iconPlayShow = false;
       // this.showPosterImg = false;
       this.playOrPause = true;
       video.play();
-      // window.onresize = function() {
-      //   video.style.width = window.innerWidth + "px";
-      //   video.style.height = window.innerHeight + "px";
-      // };
     },
     pauseVideo() {
       //暂停\播放
@@ -132,7 +139,7 @@ export default {
   padding: 75px 32px 0px;
   color: #fff;
   position: relative;
-  margin-bottom: -20px;
+  margin-bottom: -40px;
   border-color: black;
   .post-img {
     position: absolute;
@@ -145,7 +152,7 @@ export default {
   .sub-content {
     display: flex;
     justify-content: space-between;
-    margin-top: 45px;
+    margin-top: 0.35rem;
   }
   .name {
     font-size: 28px;

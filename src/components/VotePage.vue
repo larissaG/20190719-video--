@@ -16,6 +16,8 @@
         :likeStatus="item.sh_is_like"
         :likeNum="item.sh_like_num"
         :poster="item.sh_image"
+        :playStatus="item.sh_id==currentId"
+        @changeCurrentId= "getCurrentId"
       />
     </div>
   </div>
@@ -38,13 +40,18 @@ export default {
       voteList: [],
       totalTime: 5,
       content: "",
-      clock: null
+      clock: null,
+      currentId:null
     };
   },
   components: {
     VoteItem
   },
   methods: {
+    getCurrentId(childId){
+      console.log(childId);
+      this.currentId=childId;
+    },
     stop() {
       window.clearInterval(this.clock);
       this.showBeforeCover = false;

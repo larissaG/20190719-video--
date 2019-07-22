@@ -82,6 +82,8 @@ export default {
   width: 50px;
   text-align: center;
   color: #555;
+  z-index:1;
+  position: relative;
   .heart {
     width: 48px;
     height: 40px;
